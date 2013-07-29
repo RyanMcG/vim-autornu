@@ -2,8 +2,7 @@
 " Maintainer:     Ryan McGowan ryan@ryanmcg.com
 " Original Author:Mahdi Yusuf yusuf.mahdi@gmail.com (number.vim)
 " Version:        0.1.0
-" Description:    Automatically toggle relative and non realtive line autornu
-"                 in a smart way.
+" Description:    Automatically toggle relativenumber in an intelligent way.
 " Last Change:    26 June, 2012
 " License:        MIT License
 " Location:       plugin/autornu.vim
