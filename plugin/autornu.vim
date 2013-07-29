@@ -74,8 +74,8 @@ function! s:relative_off()
     else
         " Ensure that old_number exists. This should be set previously when
         " relative number was turned on.
-        if exists('b:old_number')
-            b:old_number = 1
+        if !exists('b:old_number')
+            let b:old_number = 1
         end
         let &l:number = b:old_number
     endif
