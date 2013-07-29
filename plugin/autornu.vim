@@ -97,7 +97,7 @@ function! s:reset()
     if !exists('b:control')
         " Keeps track of whether or not this plugin should control the given
         " buffer
-        let b:control = 1
+        let b:control = !s:blacklisted()
     endif
     if !exists('b:rnu')
         " Track whether the current buffer should be relative or not
@@ -108,7 +108,7 @@ function! s:reset()
         let s:has_focus = 1
     endif
 
-    if g:autornu_enable && !s:blacklisted() && b:control
+    if g:autornu_enable && b:control
         if !s:has_focus
             call s:relative_off()
         elseif b:rnu
