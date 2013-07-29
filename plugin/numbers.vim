@@ -25,6 +25,23 @@ if (!exists('g:enable_numbers'))
     let g:enable_numbers = 1
 endif
 
+if !exists('g:numbers_buffer_blacklist')
+    " some sane defaults for blacklisting
+    let g:numbers_buffer_blacklist = [
+                \'^NERD_tree_\d\+$',
+                \'^__Tagbar__$',
+                \'^__Gundo\(_Preview\)\?__$']
+endif
+
+if !exists('g:numbers_filetype_blacklist')
+    " some sane defaults for blacklisting
+    let g:numbers_filetype_blacklist = [
+                \'nerdtree',
+                \'help',
+                \'tagbar',
+                \'gundo']
+endif
+
 if v:version < 703 || &cp
     echomsg "numbers.vim: you need at least Vim 7.3 and 'nocp' set"
     echomsg "Failed loading numbers.vim"
@@ -60,8 +77,21 @@ function! s:relative_off()
     endif
 endfunction
 
+function! s:blacklisted_buffer()
+    let bufname = bufname('%')
+    return !empty(filter(copy(g:numbers_buffer_blacklist), "match(bufname, v:val) != -1"))
+endfunction
+
+function! s:blacklisted_filetype()
+    return index(g:numbers_filetype_blacklist, &filetype) >= 0
+endfunction
+
+function! s:blacklisted()
+    return s:blacklisted_filetype() || s:blacklisted_buffer()
+endfunction
+
 function! s:reset()
-    if g:enable_numbers
+    if g:enable_numbers && !s:blacklisted()
         if(s:center == 0)
             call s:relative_off()
         elseif(s:mode == 0)
