@@ -1,41 +1,42 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" File:           numbers.vim
-" Maintainer:     Mahdi Yusuf yusuf.mahdi@gmail.com
-" Version:        0.4.0
-" Description:    vim global plugin for better line numbers.
+" File:           autornu
+" Maintainer:     Ryan McGowan ryan@ryanmcg.com
+" Original Author:Mahdi Yusuf yusuf.mahdi@gmail.com (number.vim)
+" Version:        0.1.0
+" Description:    Automatically toggle relative and non realtive line autornu
+"                 in a smart way.
 " Last Change:    26 June, 2012
 " License:        MIT License
-" Location:       plugin/numbers.vim
-" Website:        https://github.com/myusuf3/numbers.vim
+" Location:       plugin/autornu.vim
+" Website:        https://github.com/RyanMcG/vim-autornu
 "
-" See numbers.txt for help.  This can be accessed by doing:
+" See autornu.txt for help.  This can be accessed by doing:
 "
 " :helptags ~/.vim/doc
-" :help numbers
+" :help autornu
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:numbers_version = '0.4.0'
+let s:autornu_version = '0.1.0'
 
-if exists("g:loaded_numbers") && g:loaded_numbers
+if exists("g:autornu_loaded") && g:loaded_autornu
     finish
 endif
-let g:loaded_numbers = 1
+let g:autornu_loaded = 1
 
-if (!exists('g:enable_numbers'))
-    let g:enable_numbers = 1
+if !exists('g:autornu_enable')
+    let g:autornu_enable = 1
 endif
 
-if !exists('g:numbers_buffer_blacklist')
+if !exists('g:autornu_buffer_blacklist')
     " some sane defaults for blacklisting
-    let g:numbers_buffer_blacklist = [
+    let g:autornu_buffer_blacklist = [
                 \'^NERD_tree_\d\+$',
                 \'^__Tagbar__$',
                 \'^__Gundo\(_Preview\)\?__$']
 endif
 
-if !exists('g:numbers_filetype_blacklist')
+if !exists('g:autornu_filetype_blacklist')
     " some sane defaults for blacklisting
-    let g:numbers_filetype_blacklist = [
+    let g:autornu_filetype_blacklist = [
                 \'nerdtree',
                 \'help',
                 \'tagbar',
@@ -43,47 +44,49 @@ if !exists('g:numbers_filetype_blacklist')
 endif
 
 if v:version < 703 || &cp
-    echomsg "numbers.vim: you need at least Vim 7.3 and 'nocp' set"
-    echomsg "Failed loading numbers.vim"
+    echomsg "autornu.vim: you need at least Vim 7.3 and 'nocp' set"
+    echomsg "Failed loading autornu.vim"
     finish
 endif
-
 
 "Allow use of line continuation
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:mode=0
-let s:center=1
-
-" Always set up auto command group so that s:mode and s:center are up to date.
-augroup NumbersAug
+let s:has_focus = 1 " Off the bat assume we have focus
+" Always set up auto command group so that b:control and s:has_focus are up to date.
+augroup AutornuAug
     au!
-    autocmd InsertEnter * :call s:set_number()
-    autocmd InsertLeave * :call s:set_relativenumber()
+    autocmd InsertEnter * :call s:set_rnu(0)
+    autocmd InsertLeave * :call s:set_rnu(1)
     autocmd BufNewFile  * :call s:reset()
     autocmd BufReadPost * :call s:reset()
-    autocmd FocusLost   * :call s:unset_center()
-    autocmd FocusGained * :call s:set_center()
-    autocmd WinEnter    * :call s:set_relativenumber()
-    autocmd WinLeave    * :call s:set_number()
+    autocmd FocusLost   * :call s:set_focus(0)
+    autocmd FocusGained * :call s:set_focus(1)
+    autocmd WinEnter    * :call s:set_rnu(1)
+    autocmd WinLeave    * :call s:set_rnu(0)
 augroup END
 
 function! s:relative_off()
     if v:version > 703 || (v:version == 703 && has('patch1115'))
         set norelativenumber
     else
-        set number
+        " Ensure that old_number exists. This should be set previously when
+        " relative number was turned on.
+        if exists('b:old_number')
+            b:old_number = 1
+        end
+        let &l:number = b:old_number
     endif
 endfunction
 
 function! s:blacklisted_buffer()
     let bufname = bufname('%')
-    return !empty(filter(copy(g:numbers_buffer_blacklist), "match(bufname, v:val) != -1"))
+    return !empty(filter(copy(g:autornu_buffer_blacklist), "match(bufname, v:val) != -1"))
 endfunction
 
 function! s:blacklisted_filetype()
-    return index(g:numbers_filetype_blacklist, &filetype) >= 0
+    return index(g:autornu_filetype_blacklist, &filetype) >= 0
 endfunction
 
 function! s:blacklisted()
@@ -91,10 +94,27 @@ function! s:blacklisted()
 endfunction
 
 function! s:reset()
-    if g:enable_numbers && !s:blacklisted()
-        if(s:center == 0)
+    if !exists('b:control')
+        " Keeps track of whether or not this plugin should control the given
+        " buffer
+        let b:control = 1
+    endif
+    if !exists('b:rnu')
+        " Track whether the current buffer should be relative or not
+        let b:rnu = 1
+    endif
+    if !exists('s:has_focus')
+        " Track whether the window has focus
+        let s:has_focus = 1
+    endif
+
+    if g:autornu_enable && !s:blacklisted() && b:control
+        if !s:has_focus
             call s:relative_off()
-        elseif(s:mode == 0)
+        elseif b:rnu
+            " Store old value of number before setting relativenumber to
+            " support pre 7.3.1115 versions of VIM
+            let b:old_number = &l:number
             set relativenumber
         else
             call s:relative_off()
@@ -102,67 +122,64 @@ function! s:reset()
     endif
 endfunc
 
-function! s:set_number()
-    let s:mode = 1
+function! s:set_focus(focus)
+    let s:has_focus = a:focus
     call s:reset()
 endfunc
 
-function! s:set_relativenumber()
-    let s:mode = 0
+function! s:set_rnu(rnu)
+    let b:rnu = a:rnu
     call s:reset()
 endfunc
 
-function! s:set_center()
-    let s:center = 1
-    call s:reset()
+function! AutornuToggle()
+    " Toggle b:control between 0 and 1
+    " NOTE: This relies on b:control existing already.
+    let b:control = (b:control + 1) % 2
+
+    if b:control
+        call s:reset()
+    else
+        call s:relative_off()
+    end
 endfunc
 
-function! s:unset_center()
-    let s:center = 0
-    call s:reset()
-endfunc
+function! AutornuEnable()
+    let g:autornu_enable = 1
 
-function! NumbersToggle()
-    " Toggle s:mode between 0 and 1
-    let s:mode = (s:mode + 1) % 2
-
-    " Use s:reset to do the work.
-    call s:reset()
-endfunc
-
-function! NumbersEnable()
-    let g:enable_numbers = 1
 
     " Remember the user's settings for nu and rnu so we can reset it later
     let s:old_number = &number
     let s:old_relativenumber = &relativenumber
 endfunc
 
-function! NumbersDisable()
-    let g:enable_numbers = 0
+function! AutornuDisable()
+    let g:autornu_enable = 0
 
-    " Reset nu and rnu to what it was before NumbersEnable was called.
-    let &number = s:old_number
-    let &relativenumber = s:old_relativenumber
+    " Reset nu and rnu to what it was before AutornuEnable was called.
+    if exists('s:old_number') && exists('s:old_relativenumber')
+        let &number = s:old_number
+        let &relativenumber = s:old_relativenumber
+    endif
 endfunc
 
-function! NumbersOnOff()
-    if (g:enable_numbers == 1)
-        call NumbersDisable()
+function! AutornuOnOff()
+    if g:autornu_enable
+        call AutornuDisable()
     else
-        call NumbersEnable()
+        call AutornuEnable()
     endif
 endfunc
 
 " Commands
-command! -nargs=0 NumbersToggle call NumbersToggle()
-command! -nargs=0 NumbersEnable call NumbersEnable()
-command! -nargs=0 NumbersDisable call NumbersDisable()
-command! -nargs=0 NumbersOnOff call NumbersOnOff()
+command! -nargs=0 AutornuToggle call AutornuToggle()
+command! -nargs=0 AutornuEnable call AutornuEnable()
+command! -nargs=0 AutornuDisable call AutornuDisable()
+command! -nargs=0 AutornuOnOff call AutornuOnOff()
 
 " reset &cpo back to users setting
 let &cpo = s:save_cpo
 
-if (g:enable_numbers)
-    call NumbersEnable()
+if g:autornu_enable
+    call AutornuEnable()
 endif
