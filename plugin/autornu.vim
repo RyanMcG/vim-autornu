@@ -1,7 +1,7 @@
 " File:           autornu
 " Maintainer:     Ryan McGowan ryan@ryanmcg.com
 " Original Author:Mahdi Yusuf yusuf.mahdi@gmail.com (number.vim)
-" Version:        0.1.0
+" Version:        0.1.1
 " Description:    Automatically toggle relativenumber in an intelligent way.
 " Last Change:    26 June, 2012
 " License:        MIT License
@@ -14,7 +14,7 @@
 " :help autornu
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:autornu_version = '0.1.0'
+let s:autornu_version = '0.1.1'
 
 if exists("g:autornu_loaded") && g:autornu_loaded
     finish
@@ -36,6 +36,7 @@ endif
 if !exists('g:autornu_filetype_blacklist')
     " some sane defaults for blacklisting
     let g:autornu_filetype_blacklist = [
+                \'qf',
                 \'nerdtree',
                 \'help',
                 \'tagbar',
