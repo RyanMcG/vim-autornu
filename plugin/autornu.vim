@@ -17,7 +17,7 @@
 
 let s:autornu_version = '0.1.0'
 
-if exists("g:autornu_loaded") && g:loaded_autornu
+if exists("g:autornu_loaded") && g:autornu_loaded
     finish
 endif
 let g:autornu_loaded = 1
