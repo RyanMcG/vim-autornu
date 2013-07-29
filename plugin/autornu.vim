@@ -103,10 +103,6 @@ function! s:reset()
         " Track whether the current buffer should be relative or not
         let b:rnu = 1
     endif
-    if !exists('s:has_focus')
-        " Track whether the window has focus
-        let s:has_focus = 1
-    endif
 
     if g:autornu_enable && b:control
         if !s:has_focus
@@ -120,17 +116,17 @@ function! s:reset()
             call s:relative_off()
         endif
     endif
-endfunc
+endfunction
 
 function! s:set_focus(focus)
     let s:has_focus = a:focus
     call s:reset()
-endfunc
+endfunction
 
 function! s:set_rnu(rnu)
     let b:rnu = a:rnu
     call s:reset()
-endfunc
+endfunction
 
 function! AutornuToggle()
     " Toggle b:control between 0 and 1
@@ -142,7 +138,7 @@ function! AutornuToggle()
     else
         call s:relative_off()
     end
-endfunc
+endfunction
 
 function! AutornuEnable()
     let g:autornu_enable = 1
@@ -151,7 +147,7 @@ function! AutornuEnable()
     " Remember the user's settings for nu and rnu so we can reset it later
     let s:old_number = &number
     let s:old_relativenumber = &relativenumber
-endfunc
+endfunction
 
 function! AutornuDisable()
     let g:autornu_enable = 0
@@ -161,7 +157,7 @@ function! AutornuDisable()
         let &number = s:old_number
         let &relativenumber = s:old_relativenumber
     endif
-endfunc
+endfunction
 
 function! AutornuOnOff()
     if g:autornu_enable
@@ -169,7 +165,7 @@ function! AutornuOnOff()
     else
         call AutornuEnable()
     endif
-endfunc
+endfunction
 
 " Commands
 command! -nargs=0 AutornuToggle call AutornuToggle()
