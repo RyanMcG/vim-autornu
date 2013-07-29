@@ -53,19 +53,20 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
+function! s:blacklisted_buffer()
+    let bufname = bufname('%')
+    return !empty(filter(copy(g:autornu_buffer_blacklist), "match(bufname, v:val) != -1"))
+endfunction
+
+function! s:blacklisted_filetype()
+    return index(g:autornu_filetype_blacklist, &filetype) >= 0
+endfunction
+
+function! s:blacklisted()
+    return s:blacklisted_filetype() || s:blacklisted_buffer()
+endfunction
+
 let s:has_focus = 1 " Off the bat assume we have focus
-" Always set up auto command group so that b:control and s:has_focus are up to date.
-augroup AutornuAug
-    au!
-    autocmd InsertEnter * :call s:set_rnu(0)
-    autocmd InsertLeave * :call s:set_rnu(1)
-    autocmd BufNewFile  * :call s:reset()
-    autocmd BufReadPost * :call s:reset()
-    autocmd FocusLost   * :call s:set_focus(0)
-    autocmd FocusGained * :call s:set_focus(1)
-    autocmd WinEnter    * :call s:set_rnu(1)
-    autocmd WinLeave    * :call s:set_rnu(0)
-augroup END
 
 function! s:relative_off()
     if v:version > 703 || (v:version == 703 && has('patch1115'))
@@ -78,19 +79,6 @@ function! s:relative_off()
         end
         let &l:number = b:old_number
     endif
-endfunction
-
-function! s:blacklisted_buffer()
-    let bufname = bufname('%')
-    return !empty(filter(copy(g:autornu_buffer_blacklist), "match(bufname, v:val) != -1"))
-endfunction
-
-function! s:blacklisted_filetype()
-    return index(g:autornu_filetype_blacklist, &filetype) >= 0
-endfunction
-
-function! s:blacklisted()
-    return s:blacklisted_filetype() || s:blacklisted_buffer()
 endfunction
 
 function! s:reset()
@@ -166,6 +154,19 @@ function! AutornuOnOff()
         call AutornuEnable()
     endif
 endfunction
+
+" Always set up auto command group so that b:control and s:has_focus are up to date.
+augroup AutornuAug
+    au!
+    autocmd InsertEnter * :call s:set_rnu(0)
+    autocmd InsertLeave * :call s:set_rnu(1)
+    autocmd BufNewFile  * :call s:reset()
+    autocmd BufReadPost * :call s:reset()
+    autocmd FocusLost   * :call s:set_focus(0)
+    autocmd FocusGained * :call s:set_focus(1)
+    autocmd WinEnter    * :call s:set_rnu(1)
+    autocmd WinLeave    * :call s:set_rnu(0)
+augroup END
 
 " Commands
 command! -nargs=0 AutornuToggle call AutornuToggle()
