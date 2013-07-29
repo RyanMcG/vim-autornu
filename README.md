@@ -1,6 +1,13 @@
 numbers.vim
 ===========
 
+## NOTICE
+
+I've decided to rename my fork of this project since its focus is slightly
+diffenrent and my changes are substantial (rewriting almost everything). The new
+project is called [vim-autornu](https://github.com/RyanMcG/vim-autornu).
+
+----
 numbers.vim is a plugin for intelligently toggling line numbers.
 
 This plugin alternates between relative numbering (`relativenumber`) and
