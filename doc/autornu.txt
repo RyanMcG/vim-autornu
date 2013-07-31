@@ -47,15 +47,16 @@ For convenience you may want to add a mapping for |:AutornuToggle| and
                                                 *g:autornu_filetype_blacklist*
 g:autornu_filetype_blacklist~
 
-Default: ['nerdtree', 'help', 'tagbar', 'gundo']
+Default: ['qf', 'git', 'fugitiveblame', 'gitcommit', 'nerdtree', 'help',
+	  'tagbar', 'gundo']
 
 If the filetype of a buffer is in the blacklist then autornu defaults to not
 control |relativenumber| in that buffer. However, the user can still enable
 autornu in that buffer by calling AutornuToggle.
 
-To override the default and not include help in this list: >
+To override the default: >
 
-    let g:autornu_filetype_blacklist = ['nerdtree', 'help', 'tagbar', 'gundo']
+    let g:autornu_filetype_blacklist = ['nerdtree', 'tagbar', 'gundo']
 <
 
 ==============================================================================
