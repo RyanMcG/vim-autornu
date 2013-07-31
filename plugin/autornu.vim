@@ -37,6 +37,9 @@ if !exists('g:autornu_filetype_blacklist')
     " some sane defaults for blacklisting
     let g:autornu_filetype_blacklist = [
                 \'qf',
+                \'git',
+                \'fugitiveblame',
+                \'gitcommit',
                 \'nerdtree',
                 \'help',
                 \'tagbar',
