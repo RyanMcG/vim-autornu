@@ -77,31 +77,31 @@ function! s:relative_off()
     else
         " Ensure that old_number exists. This should be set previously when
         " relative number was turned on.
-        if !exists('b:old_number')
-            let b:old_number = 1
+        if !exists('b:autornu_old_number')
+            let b:autornu_old_number = 1
         end
-        let &l:number = b:old_number
+        let &l:number = b:autornu_old_number
     endif
 endfunction
 
 function! s:reset()
-    if !exists('b:control')
+    if !exists('b:autornu_control')
         " Keeps track of whether or not this plugin should control the given
         " buffer
-        let b:control = !s:blacklisted()
+        let b:autornu_control = !s:blacklisted()
     endif
-    if !exists('b:rnu')
+    if !exists('b:autornu_rnu')
         " Track whether the current buffer should be relative or not
-        let b:rnu = 1
+        let b:autornu_rnu = 1
     endif
 
-    if g:autornu_enable && b:control
+    if g:autornu_enable && b:autornu_control
         if !s:has_focus
             call s:relative_off()
-        elseif b:rnu
+        elseif b:autornu_rnu
             " Store old value of number before setting relativenumber to
             " support pre 7.3.1115 versions of VIM
-            let b:old_number = &l:number
+            let b:autornu_old_number = &l:number
             set relativenumber
         else
             call s:relative_off()
@@ -115,16 +115,16 @@ function! s:set_focus(focus)
 endfunction
 
 function! s:set_rnu(rnu)
-    let b:rnu = a:rnu
+    let b:autornu_rnu = a:rnu
     call s:reset()
 endfunction
 
 function! AutornuToggle()
-    " Toggle b:control between 0 and 1
-    " NOTE: This relies on b:control existing already.
-    let b:control = (b:control + 1) % 2
+    " Toggle b:autornu_control between 0 and 1
+    " NOTE: This relies on b:autornu_control existing already.
+    let b:autornu_control = (b:autornu_control + 1) % 2
 
-    if b:control
+    if b:autornu_control
         call s:reset()
     else
         call s:relative_off()
@@ -133,7 +133,6 @@ endfunction
 
 function! AutornuEnable()
     let g:autornu_enable = 1
-
 
     " Remember the user's settings for nu and rnu so we can reset it later
     let s:old_number = &number
@@ -158,7 +157,8 @@ function! AutornuOnOff()
     endif
 endfunction
 
-" Always set up auto command group so that b:control and s:has_focus are up to date.
+" Always set up auto command group so that b:autornu_control and s:has_focus
+" are up to date.
 augroup AutornuAug
     au!
     autocmd InsertEnter * :call s:set_rnu(0)
